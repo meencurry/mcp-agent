@@ -1,0 +1,152 @@
+graph TB
+    %% User Interface Layer
+    subgraph "🖥️ User Interface Layer"
+        UI[Chainlit Web Interface]
+        Browser[Web Browser]
+        API[Chainlit API]
+    end
+
+    %% Application Layer
+    subgraph "🧠 Application Layer"
+        subgraph "Agent Core"
+            Agent[SimpleAgent]
+            Graph[LangGraph Workflow]
+            State[AgentState Management]
+        end
+        
+        subgraph "Session Management"
+            Session[Session Manager]
+            UserSession[User Session Store]
+        end
+    end
+
+    %% LangGraph Workflow Details
+    subgraph "🔄 LangGraph Processing Flow"
+        Start([Start])
+        ProcessMsg[Process Message]
+        DetermineAction{Determine Action}
+        ExecuteTool[Execute Tool]
+        GenerateResponse[Generate Response]
+        SaveToDB[Save to Database]
+        End([End])
+    end
+
+    %% Tool Integration Layer
+    subgraph "🔧 MCP Tool Integration"
+        ToolManager[SimpleMCPManager]
+        
+        subgraph "Available Tools"
+            CalcTool[Calculator Tool]
+            SearchTool[Knowledge Search Tool]
+            TimeTool[Time Tool]
+            CustomTool[Custom Tools...]
+        end
+        
+        ToolRegistry[Tool Registry]
+        ToolStats[Usage Statistics]
+    end
+
+    %% Data & Storage Layer
+    subgraph "💾 Data & Storage Layer"
+        subgraph "Vector Database"
+            ChromaDB[(ChromaDB)]
+            Collections[Collections]
+            Embeddings[Vector Embeddings]
+        end
+        
+        subgraph "Memory Management"
+            Memory[LangGraph Memory]
+            Checkpoints[Checkpoints]
+            ThreadState[Thread State]
+        end
+        
+        subgraph "File Storage"
+            SafeFiles[Safe Files Directory]
+            Logs[Application Logs]
+            Config[Configuration Files]
+        end
+    end
+
+    %% External Services
+    subgraph "🌐 External Services"
+        OpenAI[OpenAI GPT API]
+        APIs[Future APIs]
+    end
+
+    %% Configuration & Environment
+    subgraph "⚙️ Configuration"
+        EnvFile[.env Configuration]
+        Settings[Application Settings]
+        Secrets[API Keys & Secrets]
+    end
+
+    %% User Flow
+    Browser --> UI
+    UI --> API
+    API --> Session
+    Session --> Agent
+
+    %% Agent Processing Flow
+    Agent --> Graph
+    Graph --> Start
+    Start --> ProcessMsg
+    ProcessMsg --> DetermineAction
+    
+    DetermineAction -->|Tool Needed| ExecuteTool
+    DetermineAction -->|Direct Chat| GenerateResponse
+    
+    ExecuteTool --> ToolManager
+    ExecuteTool --> GenerateResponse
+    GenerateResponse --> SaveToDB
+    SaveToDB --> End
+
+    %% Tool Integration
+    ToolManager --> CalcTool
+    ToolManager --> SearchTool
+    ToolManager --> TimeTool
+    ToolManager --> CustomTool
+    ToolManager --> ToolRegistry
+    ToolManager --> ToolStats
+
+    %% Data Flow
+    Agent --> State
+    Agent --> Memory
+    SearchTool --> ChromaDB
+    SaveToDB --> ChromaDB
+    ChromaDB --> Collections
+    ChromaDB --> Embeddings
+
+    %% External Connections
+    GenerateResponse --> OpenAI
+    Agent --> OpenAI
+
+    %% Configuration Flow
+    Agent --> EnvFile
+    ToolManager --> Settings
+    ChromaDB --> Config
+
+    %% Memory Management
+    Graph --> Memory
+    Memory --> Checkpoints
+    Memory --> ThreadState
+
+    %% Logging & Storage
+    Agent --> Logs
+    ToolManager --> SafeFiles
+
+    %% Styling
+    classDef userLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef appLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef toolLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef dataLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef externalLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef configLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef flowNode fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+
+    class UI,Browser,API userLayer
+    class Agent,Graph,State,Session,UserSession appLayer
+    class ToolManager,CalcTool,SearchTool,TimeTool,CustomTool,ToolRegistry,ToolStats toolLayer
+    class ChromaDB,Collections,Embeddings,Memory,Checkpoints,ThreadState,SafeFiles,Logs,Config dataLayer
+    class OpenAI,APIs externalLayer
+    class EnvFile,Settings,Secrets configLayer
+    class Start,ProcessMsg,DetermineAction,ExecuteTool,GenerateResponse,SaveToDB,End flowNode

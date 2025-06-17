@@ -1,0 +1,9 @@
+chainlit==1.0.0
+langgraph==0.2.0
+langchain==0.3.0
+langchain-openai==0.2.0
+chromadb==0.5.0
+mcp==1.0.0
+python-dotenv==1.0.0
+pydantic==2.8.0
+uuid==1.30
