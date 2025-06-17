@@ -39,8 +39,8 @@ A sophisticated AI chat interface built with **Chainlit**, **LangGraph**, **MCP 
 
 1. **Clone the repository**:
 ```bash
-git clone <your-repo>
-cd ai-agent-chat
+git clone git@github.com:meencurry/mcp-agent.git
+cd mcp-agent
 ```
 
 2. **Run the setup script**:
@@ -57,7 +57,7 @@ OPENAI_API_KEY=sk-your-actual-openai-api-key-here
 
 4. **Start the application**:
 ```bash
-chainlit run simplified_app.py -w
+chainlit run agent.py -w
 ```
 
 5. **Open in browser**:
@@ -104,16 +104,15 @@ CHAINLIT_AUTH_SECRET=your_secret_key_here
 
 ```
 ai-agent-chat/
-├── simplified_app.py          # Main application file
-├── app.py                     # Full-featured version
-├── mcp_tools.py              # Advanced MCP tool implementations
-├── setup.sh                  # Automated setup script
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment configuration
-├── README.md                 # This file
-├── chroma_db/               # ChromaDB persistence directory
-├── safe_files/              # Safe file storage for tools
-└── logs/                    # Application logs
+├── agent.py                   # Main application file
+├── mcp.py                     # Advanced MCP tool implementations [WIP]
+├── setup.sh                   # Automated setup script
+├── requirements.txt           # Python dependencies
+├── .env                       # Environment configuration
+├── README.md                  # This file
+├── chroma_db/                 # ChromaDB persistence directory
+├── safe_files/                # Safe file storage for tools
+└── logs/                      # Application logs
 ```
 
 ## 🛠️ Available Tools
@@ -208,13 +207,13 @@ The application includes built-in monitoring:
 
 4. **Chainlit won't start**:
    - Check if port 8000 is available
-   - Try: `chainlit run simplified_app.py -w --port 8001`
+   - Try: `chainlit run agent.py -w --port 8001`
 
 ### Debug Mode
 
 Run in debug mode for detailed logs:
 ```bash
-chainlit run simplified_app.py -w --debug
+chainlit run agent.py -w --debug
 ```
 
 ### Logs
@@ -228,7 +227,7 @@ tail -f logs/app.log
 
 ### Local Development
 ```bash
-chainlit run simplified_app.py -w
+chainlit run agent.py -w
 ```
 
 ### Production Deployment
@@ -244,13 +243,13 @@ RUN pip install -r requirements.txt
 COPY . .
 EXPOSE 8000
 
-CMD ["chainlit", "run", "simplified_app.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["chainlit", "run", "agent.py", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 #### Using Gunicorn
 ```bash
 pip install gunicorn
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker simplified_app:app --bind 0.0.0.0:8000
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker agent:app --bind 0.0.0.0:8000
 ```
 
 ### Environment Variables for Production
@@ -295,6 +294,7 @@ If you encounter issues:
 
 ## 🔮 Roadmap
 
+- [ ] Add MCP tools from mcp.py into agent.py
 - [ ] Add more MCP tools (web search, file operations)
 - [ ] Implement user authentication
 - [ ] Add conversation export functionality
