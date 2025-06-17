@@ -166,28 +166,50 @@ class SimpleAgent:
         user_input = state.get("user_input", "")
         session_id = state.get("session_id", "")
         
-        # Determine if we need to use tools
-        action = self._determine_action(user_input)
+        # Create a step to show the thinking process
+        async with cl.Step(name="🤔 Analyzing Input", type="run") as step:
+            step.output = "Analyzing user input to determine required actions..."
+            
+            # Determine if we need to use tools
+            action = self._determine_action(user_input)
+            step.output = f"Detected action type: {action}"
         
         # Execute tool if needed
         tool_result = None
         if action != "chat":
             try:
-                if action == "calculate":
-                    # Extract numbers and operators
-                    import re
-                    expression = re.sub(r'[^0-9+\-*/.() ]', '', user_input)
-                    if expression.strip():
-                        tool_result = await self.mcp_manager.execute_tool("calculate", expression=expression.strip())
-                elif action == "search":
-                    tool_result = await self.mcp_manager.execute_tool("search_knowledge", query=user_input)
-                elif action == "time":
-                    tool_result = await self.mcp_manager.execute_tool("get_current_time")
+                async with cl.Step(name=f"🛠️ Using {action.title()} Tool", type="run") as tool_step:
+                    tool_step.output = f"Preparing to use {action} tool..."
+                    
+                    if action == "calculate":
+                        # Extract numbers and operators
+                        import re
+                        expression = re.sub(r'[^0-9+\-*/.() ]', '', user_input)
+                        if expression.strip():
+                            tool_step.output = f"Calculating expression: {expression}"
+                            tool_result = await self.mcp_manager.execute_tool("calculate", expression=expression.strip())
+                    elif action == "search":
+                        tool_step.output = f"Searching knowledge base for: {user_input}"
+                        tool_result = await self.mcp_manager.execute_tool("search_knowledge", query=user_input)
+                    elif action == "time":
+                        tool_step.output = "Getting current time..."
+                        tool_result = await self.mcp_manager.execute_tool("get_current_time")
+                    
+                    if tool_result:
+                        if "error" in tool_result:
+                            tool_step.output = f"❌ Tool error: {tool_result['error']}"
+                        else:
+                            tool_step.output = f"✅ Tool result: {tool_result}"
             except Exception as e:
                 tool_result = {"error": str(e)}
+                async with cl.Step(name="❌ Tool Error", type="run") as error_step:
+                    error_step.output = f"Error executing tool: {str(e)}"
         
         # Generate response
-        response = await self._generate_response(user_input, tool_result)
+        async with cl.Step(name="🧠 Generating Response", type="run") as response_step:
+            response_step.output = "Processing tool results and generating response..."
+            response = await self._generate_response(user_input, tool_result)
+            response_step.output = "Response generated successfully!"
         
         # Create messages
         messages = [
@@ -365,14 +387,8 @@ async def main(message: cl.Message):
             ).send()
             return
         
-        # Show thinking indicator
-        async with cl.Step(name="🤔 Thinking", type="run") as step:
-            step.output = "Processing your message..."
-            
-            # Process message through agent
-            response = await agent.process_message(message.content, session_id)
-            
-            step.output = "✅ Response ready!"
+        # Process message through agent
+        response = await agent.process_message(message.content, session_id)
         
         # Send response
         await cl.Message(
